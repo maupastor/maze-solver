@@ -36,10 +36,9 @@ class Cell:
             self.__win.draw_line(line)
     
     def draw_move(self, to_cell, undo=False):
+        color = "red"
         if undo:
             color = "gray"
-        else:
-            color = "red"
         
         x1 = (self.__x1 + self.__x2) // 2
         y1 = (self.__y1 + self.__y2) // 2
