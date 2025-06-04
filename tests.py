@@ -20,6 +20,58 @@ class Tests(unittest.TestCase):
         num_rows = 6
         m1 = Maze(0, 0, num_rows, num_cols, 10, 10)
         self.assertIsNone(m1._Maze__win)
+    
+    def test_break_entrance_and_exit(self):
+        num_cols = 8
+        num_rows = 6
+        m1 = Maze(0, 0, num_rows, num_cols, 10, 10)
+
+        self.assertEqual(
+            m1._Maze__cells[0][0].has_top_wall,
+            False,
+        )
+
+        self.assertEqual(
+            m1._Maze__cells[num_cols - 1][num_rows - 1].has_bottom_wall,
+            False,
+        )
+    
+    def test_maze_break_walls_r(self):
+        num_cols = 3
+        num_rows = 4
+        seed = "test"
+
+        m1 = Maze(0, 0, num_rows, num_cols, 10, 10, seed=seed)
+        expected_cells = []
+        
+        # top, right, bottom, left
+        expected_cells.append([
+            [False, False, False, True],
+            [False, False, False, True],
+            [False, True, False, True],
+            [False, True, True, True],
+        ])
+        expected_cells.append([
+            [True, False, True, False],
+            [True, False, True, False],
+            [True, True, False, True],
+            [False, False, True, True],
+        ])
+        expected_cells.append([
+            [True, True, True, False],
+            [True, True, False, False],
+            [False, True, False, True],
+            [False, True, False, False],
+        ])
+
+        for i in range(len(expected_cells)):
+            for j in range(len(expected_cells[i])):
+                exp_cell = expected_cells[i][j]
+                actual_cell = m1._Maze__cells[i][j]
+                self.assertEqual(exp_cell[0], actual_cell.has_top_wall)
+                self.assertEqual(exp_cell[1], actual_cell.has_right_wall)
+                self.assertEqual(exp_cell[2], actual_cell.has_bottom_wall)
+                self.assertEqual(exp_cell[3], actual_cell.has_left_wall)
 
 
 if __name__ == "__main__":
