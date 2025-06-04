@@ -21,6 +21,8 @@ class Maze:
         self.__break_entrance_and_exit()
         if num_cols > 0 and num_rows > 0:
             self.__break_walls_r(0, 0)
+        
+        self.__reset_cells_visited()
     
     def __create_cells(self):
         for i in range(self.__num_cols):
@@ -94,6 +96,11 @@ class Maze:
             self.__draw_cell(*cell_to_break)
 
             self.__break_walls_r(*cell_to_break)
+
+    def __reset_cells_visited(self):
+        for row in self.__cells:
+            for cell in row:
+                cell.visited = False
     
     def __repr__(self):
         s = ""

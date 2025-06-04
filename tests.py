@@ -21,7 +21,7 @@ class Tests(unittest.TestCase):
         m1 = Maze(0, 0, num_rows, num_cols, 10, 10)
         self.assertIsNone(m1._Maze__win)
     
-    def test_break_entrance_and_exit(self):
+    def test_maze_break_entrance_and_exit(self):
         num_cols = 8
         num_rows = 6
         m1 = Maze(0, 0, num_rows, num_cols, 10, 10)
@@ -43,7 +43,7 @@ class Tests(unittest.TestCase):
 
         m1 = Maze(0, 0, num_rows, num_cols, 10, 10, seed=seed)
         expected_cells = []
-        
+
         # top, right, bottom, left
         expected_cells.append([
             [False, False, False, True],
@@ -72,6 +72,24 @@ class Tests(unittest.TestCase):
                 self.assertEqual(exp_cell[1], actual_cell.has_right_wall)
                 self.assertEqual(exp_cell[2], actual_cell.has_bottom_wall)
                 self.assertEqual(exp_cell[3], actual_cell.has_left_wall)
+        
+    def test_maze_reset_cell_visited(self):
+        num_cols = 3
+        num_rows = 4
+        seed = "test"
+
+        m1 = Maze(0, 0, num_rows, num_cols, 10, 10, seed=seed)
+
+        visited = False
+        for row in m1._Maze__cells:
+            for cell in row:
+                if cell.visited:
+                    visited = True
+                    break
+            if visited:
+                break
+        
+        self.assertEqual(visited, False)
 
 
 if __name__ == "__main__":
