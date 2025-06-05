@@ -44,13 +44,13 @@ class Maze:
         y2 = y1 + self.__cell_size_y
 
         self.__cells[i][j].draw(x1, y1, x2, y2)
-        self.__animate()
+        self.__animate(0.01)
     
-    def __animate(self):
+    def __animate(self, ms=0.05):
         if self.__win is None:
             return
         self.__win.redraw()
-        time.sleep(0.05)
+        time.sleep(ms)
     
     def __break_entrance_and_exit(self):
         self.__cells[0][0].has_top_wall = False
@@ -102,6 +102,37 @@ class Maze:
             for cell in row:
                 cell.visited = False
     
+    def solve(self):
+        return self.solve_r(0, 0)
+    
+    def solve_r(self, i, j):
+        self.__animate()
+
+        cell = self.__cells[i][j]
+        cell.visited = True
+
+        if i + 1 == self.__num_cols and j + 1 == self.__num_rows:
+            return True
+
+        next_cells = []
+        if i - 1 > 0 and not cell.has_left_wall and self.__cells[i - 1][j].visited == False:
+            next_cells.append([i - 1, j])
+        if i + 1 < self.__num_cols and not cell.has_right_wall and self.__cells[i + 1][j].visited == False:
+            next_cells.append([i + 1, j])
+        if j - 1 > 0 and not cell.has_top_wall and self.__cells[i][j - 1].visited == False:
+            next_cells.append([i, j - 1])
+        if j + 1 < self.__num_rows and not cell.has_bottom_wall and self.__cells[i][j + 1].visited == False:
+            next_cells.append([i, j + 1])
+        
+        for next in next_cells:
+            next_cell = self.__cells[next[0]][next[1]]
+            cell.draw_move(next_cell)
+            if self.solve_r(*next):
+                return True
+            cell.draw_move(next_cell, undo=True)
+        
+        return False
+
     def __repr__(self):
         s = ""
         for i in range(self.__num_cols):
