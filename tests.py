@@ -46,22 +46,22 @@ class Tests(unittest.TestCase):
 
         # top, right, bottom, left
         expected_cells.append([
-            [False, False, False, True],
-            [False, False, False, True],
             [False, True, False, True],
-            [False, True, True, True],
-        ])
-        expected_cells.append([
-            [True, False, True, False],
-            [True, False, True, False],
+            [False, False, True, True],
             [True, True, False, True],
             [False, False, True, True],
         ])
         expected_cells.append([
-            [True, True, True, False],
+            [True, False, True, True],
+            [True, False, True, False],
+            [True, False, False, True],
+            [False, False, True, False],
+        ])
+        expected_cells.append([
             [True, True, False, False],
-            [False, True, False, True],
             [False, True, False, False],
+            [False, True, True, False],
+            [True, True, False, False],
         ])
 
         for i in range(len(expected_cells)):
@@ -90,6 +90,22 @@ class Tests(unittest.TestCase):
                 break
         
         self.assertEqual(visited, False)
+    
+    def test_maze_solve(self):
+        num_cols = 6
+        num_rows = 8
+
+        margin = 50
+        screen_x = 800
+        screen_y = 600
+
+        cell_size_x = (screen_x - 2 * margin) / num_cols
+        cell_size_y = (screen_y - 2 * margin) / num_rows
+
+        m1 = Maze(margin, margin, num_rows, num_cols, cell_size_x, cell_size_y, seed="test")
+
+        solved = m1.solve()
+        self.assertEqual(solved, True)
 
 
 if __name__ == "__main__":

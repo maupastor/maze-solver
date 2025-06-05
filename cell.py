@@ -58,7 +58,8 @@ class Cell:
         y2 = (to_cell.__y1 + to_cell.__y2) // 2
 
         line = Line(Point(x1, y1), Point(x2, y2))
-        self.__win.draw_line(line, color)
+        if self.__win is not None:
+            self.__win.draw_line(line, color)
 
     def __repr__(self):
         s = ""

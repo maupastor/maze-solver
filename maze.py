@@ -63,13 +63,13 @@ class Maze:
         self.__cells[i][j].visited = True
         while True:
             directions = []
-            if i - 1 > 0 and self.__cells[i - 1][j].visited == False:
+            if i > 0 and self.__cells[i - 1][j].visited == False:
                 directions.append([i - 1, j])
-            if i + 1 < self.__num_cols and self.__cells[i + 1][j].visited == False:
+            if i < self.__num_cols - 1 and self.__cells[i + 1][j].visited == False:
                 directions.append([i + 1, j])
-            if j - 1 > 0 and self.__cells[i][j - 1].visited == False:
+            if j > 0 and self.__cells[i][j - 1].visited == False:
                 directions.append([i, j - 1])
-            if j + 1 < self.__num_rows and self.__cells[i][j + 1].visited == False:
+            if j < self.__num_rows - 1 and self.__cells[i][j + 1].visited == False:
                 directions.append([i, j + 1])
             
             if len(directions) == 0:
@@ -115,13 +115,13 @@ class Maze:
             return True
 
         next_cells = []
-        if i - 1 > 0 and not cell.has_left_wall and self.__cells[i - 1][j].visited == False:
+        if i > 0 and not cell.has_left_wall and self.__cells[i - 1][j].visited == False:
             next_cells.append([i - 1, j])
-        if i + 1 < self.__num_cols and not cell.has_right_wall and self.__cells[i + 1][j].visited == False:
+        if i < self.__num_cols - 1 and not cell.has_right_wall and self.__cells[i + 1][j].visited == False:
             next_cells.append([i + 1, j])
-        if j - 1 > 0 and not cell.has_top_wall and self.__cells[i][j - 1].visited == False:
+        if j > 0 and not cell.has_top_wall and self.__cells[i][j - 1].visited == False:
             next_cells.append([i, j - 1])
-        if j + 1 < self.__num_rows and not cell.has_bottom_wall and self.__cells[i][j + 1].visited == False:
+        if j < self.__num_rows - 1 and not cell.has_bottom_wall and self.__cells[i][j + 1].visited == False:
             next_cells.append([i, j + 1])
         
         for next in next_cells:
