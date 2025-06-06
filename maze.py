@@ -106,8 +106,7 @@ class Maze:
         return self.solve_r(0, 0)
     
     def solve_r(self, i, j):
-        self.__animate()
-
+        self.__animate(0.03)
         cell = self.__cells[i][j]
         cell.visited = True
 
@@ -130,6 +129,7 @@ class Maze:
             if self.solve_r(*next):
                 return True
             cell.draw_move(next_cell, undo=True)
+            self.__animate(0.20)
         
         return False
 
