@@ -132,6 +132,110 @@ class Maze:
             self.__animate(0.20)
         
         return False
+    
+    def solve_a_star(self, start, goal):
+        open_list = []
+
+        self.__cells[start[0]][start[1]].f = 0
+        self.__cells[start[0]][start[1]].g = 0
+        self.__cells[start[0]][start[1]].h = 0
+        self.__cells[start[0]][start[1]].parent_i = start[0]
+        self.__cells[start[0]][start[1]].parent_j = start[1]
+
+        open_list.append([(start[0], start[1]), 0])
+
+        while len(open_list) > 0:
+            qi = self.find_lowest_score_element(open_list)
+            q = open_list.pop(qi)
+
+            i = q[0][0]
+            j = q[0][1]
+            self.__cells[i][j].visited = True
+
+            directions = []
+            if i > 0 and not self.__cells[i][j].has_left_wall and self.__cells[i - 1][j].visited == False:
+                directions.append([i - 1, j])
+            if i < self.__num_cols - 1 and not self.__cells[i][j].has_right_wall and self.__cells[i + 1][j].visited == False:
+                directions.append([i + 1, j])
+            if j > 0 and not self.__cells[i][j].has_top_wall and self.__cells[i][j - 1].visited == False:
+                directions.append([i, j - 1])
+            if j < self.__num_rows - 1 and not self.__cells[i][j].has_bottom_wall and self.__cells[i][j + 1].visited == False:
+                directions.append([i, j + 1])
+            
+            for dir in directions:
+                new_i = dir[0]
+                new_j = dir[1]
+
+                if new_i == goal[0] and new_j == goal[1]:
+                    # goal reached
+                    self.__cells[new_i][new_j].parent_i = i
+                    self.__cells[new_i][new_j].parent_j = j
+                    self.trace_path(self.__cells, goal)
+                    return True
+                else:
+                    g_new = self.__cells[i][j].g + 1
+                    h_new = self.calculate_h_a_star(new_i, new_j, goal)
+                    f_new = g_new + h_new
+
+                    if self.__cells[new_i][new_j].f == float("inf") or f_new <= self.__cells[new_i][new_j].f:
+                        open_list.append([(new_i, new_j), f_new])
+                        self.__cells[new_i][new_j].f = f_new
+                        self.__cells[new_i][new_j].g = g_new
+                        self.__cells[new_i][new_j].h = h_new
+                        self.__cells[new_i][new_j].parent_i = i
+                        self.__cells[new_i][new_j].parent_j = j
+        
+        return False
+
+    def calculate_h_a_star(self, i, j, goal):
+        # Euclidean distance
+        return ((i - goal[0]) ** 2 + (j - goal[1]) ** 2) ** 0.5
+
+    def trace_path(self, cell_details, dest):
+        print("The Path is ")
+        path = []
+        row = dest[0]
+        col = dest[1]
+
+        # Trace the path from destination to source using parent cells
+        while not (cell_details[row][col].parent_i == row and cell_details[row][col].parent_j == col):
+            path.append((row, col))
+            temp_row = cell_details[row][col].parent_i
+            temp_col = cell_details[row][col].parent_j
+            row = temp_row
+            col = temp_col
+
+        # Add the source cell to the path
+        path.append((row, col))
+        # Reverse the path to get the path from source to destination
+        path.reverse()
+
+        self.draw_path_a_star(path)
+
+    def draw_path_a_star(self, path):
+        cell = None
+        for coords in path:
+            self.__animate()
+            next_cell = self.__cells[coords[0]][coords[1]]
+            if cell is not None:
+                cell.draw_move(next_cell)
+            cell = next_cell
+
+    
+    def find_lowest_score_element(self, l):
+        if l is None or not isinstance(l, list):
+            return None
+        
+        min_index = None
+        current_min_score = float("inf")
+        for i in range(len(l)):
+            cell_x = l[i][0][0]
+            cell_y = l[i][0][1]
+            if self.__cells[cell_x][cell_y].f != float("inf") and self.__cells[cell_x][cell_y].f < current_min_score:
+                min_index = i
+                current_min_score = self.__cells[cell_x][cell_y].f
+        
+        return min_index
 
     def __repr__(self):
         s = ""
