@@ -192,7 +192,6 @@ class Maze:
         return ((i - goal[0]) ** 2 + (j - goal[1]) ** 2) ** 0.5
 
     def trace_path(self, cell_details, dest):
-        print("The Path is ")
         path = []
         row = dest[0]
         col = dest[1]
