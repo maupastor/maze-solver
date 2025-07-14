@@ -102,6 +102,7 @@ class Maze:
             for cell in row:
                 cell.visited = False
     
+    # Depth-first search algorithm
     def solve(self):
         return self.solve_r(0, 0)
     
@@ -133,6 +134,7 @@ class Maze:
         
         return False
     
+    # A* algorithm
     def solve_a_star(self, start, goal):
         open_list = []
 
@@ -236,6 +238,86 @@ class Maze:
         
         return min_index
 
+    # Breadth-first search algorithm
+    def solve_bfs(self, root, goal):
+        visited = []
+        queue = []
+        cell = None
+        queue.append(root)
+
+        from_cells = {}
+
+        while len(queue) > 0:
+            current = queue.pop(0)
+            i = current[0]
+            j = current[1]
+
+            cell = self.__cells[i][j]
+
+            if (i, j) in from_cells:
+                self.__animate(0.2)
+                from_cell_coords = from_cells[(i, j)]
+                from_cell = self.__cells[from_cell_coords[0]][from_cell_coords[1]]
+                from_cell.draw_move(self.__cells[i][j])
+
+
+            visited.append(current)
+            cell.visited = True
+
+            if i == goal[0] and j == goal[1]:
+                return True
+
+            directions = []
+            if i > 0 and not self.__cells[i][j].has_left_wall and self.__cells[i - 1][j].visited == False:
+                directions.append([i - 1, j])
+            if i < self.__num_cols - 1 and not self.__cells[i][j].has_right_wall and self.__cells[i + 1][j].visited == False:
+                directions.append([i + 1, j])
+            if j > 0 and not self.__cells[i][j].has_top_wall and self.__cells[i][j - 1].visited == False:
+                directions.append([i, j - 1])
+            if j < self.__num_rows - 1 and not self.__cells[i][j].has_bottom_wall and self.__cells[i][j + 1].visited == False:
+                directions.append([i, j + 1])
+
+            if (i, j) in from_cells:
+                from_cells[(i, j)] = (from_cells[(i, j)][0], from_cells[(i, j)][1], len(directions))
+
+            for neighbor in directions:
+                if not neighbor in visited + queue:
+                    queue.append(neighbor)
+                    from_cells[(neighbor[0], neighbor[1])] = (i, j, 0)
+            
+            if len(directions) == 0 and len(queue) > 0:
+                #No paths found -> undo
+                self.undo_path_bfs(from_cells, (i, j), queue)
+                
+
+        return False
+    
+    def undo_path_bfs(self, paths, coords, next_cells_coords):
+        if not isinstance(paths, dict) or len(paths.keys()) == 0 or not next_cells_coords:
+            return
+
+        i, j = coords
+
+        while (i, j) in paths and [i, j] not in next_cells_coords:
+            parent_i, parent_j, parent_dirs = paths[(i, j)]
+
+            cell = self.__cells[i][j]
+            parent_cell = self.__cells[parent_i][parent_j]
+            
+            if paths[(parent_i, parent_j)]:
+                undo_path = paths[(parent_i, parent_j)]
+                if undo_path[2] == 0:
+                    break
+                paths[(parent_i, parent_j)] = (undo_path[0], undo_path[1], undo_path[2] - 1)
+
+            self.__animate(0.4)
+            cell.draw_move(parent_cell, undo=True)
+
+            i, j, dirs = parent_i, parent_j, parent_dirs
+
+            if paths[(parent_i, parent_j)][2] > 0:
+                break            
+        
     def __repr__(self):
         s = ""
         for i in range(self.__num_cols):

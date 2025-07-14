@@ -18,7 +18,9 @@ def main():
 
     # maze.solve()
 
-    maze.solve_a_star([0, 0], [num_cols - 1, num_rows - 1])
+    #maze.solve_a_star([0, 0], [num_cols - 1, num_rows - 1])
+
+    maze.solve_bfs([0, 0], [num_cols - 1, num_rows - 1])
 
     win.wait_for_close()
     
