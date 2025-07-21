@@ -1,6 +1,7 @@
 from cell import Cell
 import time
 import random
+from constants import SOLVE_ALGOS
 
 class Maze:
 
@@ -14,6 +15,12 @@ class Maze:
         self.__win = win
         self.__cells = []
 
+        self.loaded = False # if True, maze is loaded
+        self.solving = False # if True, maze is getting solved
+        self.tried_solving = False # if true, solve was called
+        self.force_stop_solving = False # forcing stop while solving
+        self.solved = False # if True, maze was solved
+
         if seed is not None:
             random.seed(seed)
 
@@ -23,6 +30,8 @@ class Maze:
             self.__break_walls_r(0, 0)
         
         self.__reset_cells_visited()
+
+        self.loaded = True
     
     def __create_cells(self):
         for i in range(self.__num_cols):
@@ -102,11 +111,34 @@ class Maze:
             for cell in row:
                 cell.visited = False
     
+    def solve(self, algo="dfs"):
+        if not algo in SOLVE_ALGOS:
+            raise Exception("Invalid solving algorithm")
+        
+        self.tried_solving = True
+        
+        if algo == "dfs":
+            self.solved = self.solve_dfs()
+        elif algo == "bfs":
+            self.solved = self.solve_bfs([0, 0], [self.__num_cols - 1, self.__num_rows - 1])
+        elif algo == "A*":
+            self.solved = self.solve_a_star([0, 0], [self.__num_cols - 1, self.__num_rows - 1])
+        
+        return self.solved
+
     # Depth-first search algorithm
-    def solve(self):
-        return self.solve_r(0, 0)
+    def solve_dfs(self):
+        self.force_stop_solving = False
+        self.solving = True
+        solved = self.solve_dfs_r(0, 0)
+        self.solving = False
+        return solved
     
-    def solve_r(self, i, j):
+    def solve_dfs_r(self, i, j):
+        if self.force_stop_solving:
+             # Solving aborted
+            return
+
         self.__animate(0.03)
         cell = self.__cells[i][j]
         cell.visited = True
@@ -125,10 +157,19 @@ class Maze:
             next_cells.append([i, j + 1])
         
         for next in next_cells:
+            if self.force_stop_solving:
+                # Solving aborted
+                return False
+            
             next_cell = self.__cells[next[0]][next[1]]
             cell.draw_move(next_cell)
-            if self.solve_r(*next):
+            if self.solve_dfs_r(*next):
                 return True
+            
+            if self.force_stop_solving:
+                # Solving aborted
+                return False
+
             cell.draw_move(next_cell, undo=True)
             self.__animate(0.20)
         
@@ -254,6 +295,7 @@ class Maze:
 
             cell = self.__cells[i][j]
 
+            # Drawing move
             if (i, j) in from_cells:
                 self.__animate(0.2)
                 from_cell_coords = from_cells[(i, j)]
@@ -265,8 +307,10 @@ class Maze:
             cell.visited = True
 
             if i == goal[0] and j == goal[1]:
+                #Goal reached
                 return True
 
+            # Searching available directions from current cell
             directions = []
             if i > 0 and not self.__cells[i][j].has_left_wall and self.__cells[i - 1][j].visited == False:
                 directions.append([i - 1, j])
@@ -277,22 +321,23 @@ class Maze:
             if j < self.__num_rows - 1 and not self.__cells[i][j].has_bottom_wall and self.__cells[i][j + 1].visited == False:
                 directions.append([i, j + 1])
 
+            # Storing total directions from current node -> used in undoing path
             if (i, j) in from_cells:
                 from_cells[(i, j)] = (from_cells[(i, j)][0], from_cells[(i, j)][1], len(directions))
 
             for neighbor in directions:
                 if not neighbor in visited + queue:
                     queue.append(neighbor)
-                    from_cells[(neighbor[0], neighbor[1])] = (i, j, 0)
+                    from_cells[(neighbor[0], neighbor[1])] = (i, j, 0) # keeping track of node's parent
             
             if len(directions) == 0 and len(queue) > 0:
-                #No paths found -> undo
+                # No paths found -> undo
                 self.undo_path_bfs(from_cells, (i, j), queue)
-                
 
         return False
     
     def undo_path_bfs(self, paths, coords, next_cells_coords):
+        # Undoing path
         if not isinstance(paths, dict) or len(paths.keys()) == 0 or not next_cells_coords:
             return
 
@@ -307,16 +352,24 @@ class Maze:
             if paths[(parent_i, parent_j)]:
                 undo_path = paths[(parent_i, parent_j)]
                 if undo_path[2] == 0:
+                    # No directions from current path
                     break
+                
+                # Removing direction from total path drawn from current node
                 paths[(parent_i, parent_j)] = (undo_path[0], undo_path[1], undo_path[2] - 1)
 
+            # Drawing undo move
             self.__animate(0.4)
             cell.draw_move(parent_cell, undo=True)
 
-            i, j, dirs = parent_i, parent_j, parent_dirs
+            i, j, dirs = parent_i, parent_j, parent_dirs # updating vars to consider next node in current path
 
             if paths[(parent_i, parent_j)][2] > 0:
-                break            
+                # No directions from parent path
+                break
+    
+    def abort_solving(self):
+        self.force_stop_solving = True
         
     def __repr__(self):
         s = ""

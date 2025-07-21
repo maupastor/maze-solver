@@ -1,4 +1,6 @@
-from graphics import Window
+from graphics import Window, Label, Input, InputType
+from config import Config
+from constants import SCREEN_X, SCREEN_Y
 from maze import Maze
 
 def main():
@@ -6,21 +8,15 @@ def main():
     num_cols = 6
     margin = 50
 
-    screen_x = 800
-    screen_y = 600
+    screen_x = SCREEN_X
+    screen_y = SCREEN_Y
 
     cell_size_x = (screen_x - 2 * margin) / num_cols
     cell_size_y = (screen_y - 2 * margin) / num_rows
 
     win = Window(screen_x, screen_y)
-    
-    maze = Maze(margin, margin, num_rows, num_cols, cell_size_x, cell_size_y, win, seed="test")
-
-    # maze.solve()
-
-    #maze.solve_a_star([0, 0], [num_cols - 1, num_rows - 1])
-
-    maze.solve_bfs([0, 0], [num_cols - 1, num_rows - 1])
+    config = Config(win)
+    config.draw_config()
 
     win.wait_for_close()
     
